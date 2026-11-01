@@ -259,8 +259,7 @@ export default function Navbar() {
                 {link.name}
               </Link>
             ))}
-
-            {/* Mobile Authentication */}
+            
             {isPending ? (
               <div className="mt-3 h-12 animate-pulse rounded-xl bg-slate-100" />
             ) : !user ? (
