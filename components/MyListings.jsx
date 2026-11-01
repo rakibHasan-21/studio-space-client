@@ -19,7 +19,7 @@ const MyListings = ({ studios }) => {
         <Link
           href="/add-studio"
           className="mt-5 inline-block rounded-lg bg-green-600 px-6 py-3 text-white"
-        >
+          >
           Add New Studio
         </Link>
       </div>
@@ -87,5 +87,4 @@ const MyListings = ({ studios }) => {
     </div>
   );
 };
-
 export default MyListings;
