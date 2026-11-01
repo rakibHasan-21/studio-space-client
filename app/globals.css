@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "tw-animate-css";
+/* @import "tw-animate-css"; */
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
@@ -132,7 +132,7 @@
 
 /* Custom Animated Cursor */
 
-@media (pointer: fine) {
+/* @media (pointer: fine) {
   body {
     cursor: none;
   }
@@ -194,7 +194,7 @@
   .cursor-follower {
     display: none;
   }
-}
+} */
 
 /* Navbar Entrance Animation */
 

@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import Link from "next/link";
+import { authClient } from "@/lib/auth-client";
 
 import {
   Aperture,
@@ -20,16 +22,14 @@ import { FaGoogle } from "react-icons/fa6";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 const Login = () => {
   const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleLogin = async (e) => {
@@ -39,32 +39,54 @@ const Login = () => {
     const formData = new FormData(e.target);
     const userInfo = Object.fromEntries(formData.entries());
 
-    console.log(userInfo)
     if (!userInfo.email || !userInfo.password) {
-      setError("Please enter your email and password.");
+      toast.error("Please enter your email and password.");
       return;
     }
 
-    // Better Auth login integration will go here.
-    // On successful login:
-    // router.push(callbackURL || "/");
+    try {
+      setLoading(true);
 
-    setError("Authentication is not connected yet. Please configure Better Auth.");
+      const { data, error } = await authClient.signIn.email({
+        email: userInfo.email,
+        password: userInfo.password,
+        callbackURL: "/",
+      });
+
+      if (error) {
+        setError(error.message || "Invalid email or password!");
+        toast.error(error.message || "Login failed!");
+        return;
+      }
+
+      if (data) {
+        toast.success("Login successful!");
+        router.push("/");
+        router.refresh();
+      }
+    } catch (error) {
+      console.error("Login Error:", error);
+      toast.error("Something went wrong!");
+    } finally {
+      setLoading(false);
+    }
   };
-
-  const handleGoogleLogin = () => {
-    // Connect Better Auth Google sign-in here.
-    setError("Google authentication is not connected yet.");
+  const GoogleSignUp = async () => {
+    try {
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/",
+      });
+    } catch (error) {
+      console.error("Google Signup Error:", error);
+      toast.error("Google signup failed!");
+    }
   };
-
   return (
     <section className="flex min-h-[calc(100vh-76px)] items-center justify-center bg-slate-50 px-4 py-12">
-
       <Card className="mx-auto grid w-full max-w-5xl overflow-hidden rounded-3xl border-slate-200 p-0 shadow-xl shadow-slate-900/5 md:grid-cols-2">
-
         {/* Left Side */}
         <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-800 p-10 text-white md:flex">
-
           <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-white/10 blur-2xl" />
 
           <div className="absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-violet-400/20 blur-2xl" />
@@ -74,13 +96,10 @@ const Login = () => {
               <Aperture size={26} />
             </div>
 
-            <span className="text-2xl font-extrabold">
-              StudioSpace
-            </span>
+            <span className="text-2xl font-extrabold">StudioSpace</span>
           </Link>
 
           <div className="relative my-12">
-
             <p className="mb-4 text-sm font-bold uppercase tracking-[4px] text-indigo-200">
               Welcome Back
             </p>
@@ -90,8 +109,8 @@ const Login = () => {
             </h1>
 
             <p className="mt-5 max-w-sm leading-7 text-indigo-100">
-              Sign in to discover inspiring studios, manage your bookings,
-              and continue creating something amazing.
+              Sign in to discover inspiring studios, manage your bookings, and
+              continue creating something amazing.
             </p>
 
             <div className="mt-8 space-y-4">
@@ -119,7 +138,6 @@ const Login = () => {
         {/* Right Side */}
         <CardContent className="px-6 py-12 sm:px-10 lg:px-12">
           <div className="mx-auto max-w-md">
-
             {/* Mobile Logo */}
             <div className="mb-8 md:hidden">
               <Link href="/" className="flex items-center gap-2">
@@ -150,7 +168,6 @@ const Login = () => {
 
             {/* Login Form */}
             <form onSubmit={handleLogin} className="space-y-5">
-
               {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address</Label>
@@ -198,13 +215,11 @@ const Login = () => {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-indigo-600"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                   >
-                    {showPassword ? (
-                      <EyeOff size={19} />
-                    ) : (
-                      <Eye size={19} />
-                    )}
+                    {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
                   </button>
                 </div>
               </div>
@@ -220,11 +235,14 @@ const Login = () => {
               {/* Login Button */}
               <Button
                 type="submit"
+                disabled={loading}
                 className="group h-12 w-full rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-sm font-bold text-white shadow-lg shadow-indigo-500/20 transition hover:-translate-y-0.5 hover:from-indigo-700 hover:to-violet-700"
               >
-                Login
+                {loading ? "Logging in..." : "Login"}
 
-                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                {!loading && (
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                )}
               </Button>
             </form>
 
@@ -241,9 +259,9 @@ const Login = () => {
 
             {/* Google Login */}
             <Button
+            onClick={GoogleSignUp}
               type="button"
               variant="outline"
-              onClick={handleGoogleLogin}
               className="h-12 w-full rounded-xl border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               <FaGoogle className="mr-2 h-4 w-4 text-red-500" />
@@ -253,7 +271,6 @@ const Login = () => {
             {/* Register Link */}
             <p className="mt-8 text-center text-sm text-slate-500">
               Don't have an account?{" "}
-
               <Link
                 href="/register"
                 className="font-bold text-indigo-600 transition hover:text-violet-600"

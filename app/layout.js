@@ -2,7 +2,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navber";
-import CustomCursor from "@/components/CustomCursor";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+// import CustomCursor from "@/components/CustomCursor";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,11 +19,14 @@ const geistMono = Geist_Mono({
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}cz-shortcut-listen="true">
-        <CustomCursor></CustomCursor>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        cz-shortcut-listen="true"
+      >
+        {/* <CustomCursor></CustomCursor> */}
         <Navbar></Navbar>
         {children}
-
+        <ToastContainer position="top-right" autoClose={3000} theme="colored" />
         <Footer />
       </body>
     </html>
