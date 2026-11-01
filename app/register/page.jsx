@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
 import {
   Aperture,
   Mail,
@@ -14,7 +13,6 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-
 import { FaGoogle } from "react-icons/fa6";
 import { toast } from "react-toastify";
 
@@ -50,7 +48,6 @@ const Register = () => {
       toast.error("Passwords do not match!");
       return;
     }
-
     if (userInfo.password.length < 8) {
       toast.error("Password must be at least 8 characters.");
       return;
