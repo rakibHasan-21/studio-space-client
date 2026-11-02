@@ -1,9 +1,16 @@
+
 "use client";
 
 import React, { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
-import { Upload, Plus, X, Building2, MapPin, DollarSign } from "lucide-react";
+import {
+  Upload,
+  Plus,
+  X,
+  Building2,
+  MapPin,
+} from "lucide-react";
 
 const categories = [
   "Photo Studio",
@@ -27,8 +34,18 @@ const availableAmenities = [
   "Furniture",
 ];
 
+const initialFormData = {
+  title: "",
+  category: "",
+  hourlyRate: "",
+  securityDeposit: "",
+  maxCapacity: "",
+  location: "",
+  overview: "",
+};
+
 const AddStudio = () => {
-  const { data: session } = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession();
   const user = session?.user;
 
   const [loading, setLoading] = useState(false);
@@ -36,15 +53,7 @@ const AddStudio = () => {
   const [customAmenity, setCustomAmenity] = useState("");
   const [amenities, setAmenities] = useState([]);
 
-  const [formData, setFormData] = useState({
-    title: "",
-    category: "",
-    hourlyRate: "",
-    securityDeposit: "",
-    maxCapacity: "",
-    location: "",
-    overview: "",
-  });
+  const [formData, setFormData] = useState(initialFormData);
 
   // Input Change
   const handleChange = (e) => {
@@ -61,7 +70,7 @@ const AddStudio = () => {
     setAmenities((prev) =>
       prev.includes(amenity)
         ? prev.filter((item) => item !== amenity)
-        : [...prev, amenity],
+        : [...prev, amenity]
     );
   };
 
@@ -83,22 +92,22 @@ const AddStudio = () => {
     setImageUrl(e.target.value);
   };
 
-  // Form Submit (Client Side Only)
+  // Form Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!user) {
-      alert("Please login first!");
+    if (!user?.email) {
+      toast.error("Please login first!");
       return;
     }
 
     if (!amenities.length) {
-      alert("Please select at least one amenity!");
+      toast.error("Please select at least one amenity!");
       return;
     }
 
-    if (!imageUrl) {
-      alert("Please provide an image URL!");
+    if (!imageUrl.trim()) {
+      toast.error("Please provide an image URL!");
       return;
     }
 
@@ -107,15 +116,21 @@ const AddStudio = () => {
       hourlyRate: Number(formData.hourlyRate),
       securityDeposit: Number(formData.securityDeposit),
       maxCapacity: Number(formData.maxCapacity),
-      imageUrl,
+      imageUrl: imageUrl.trim(),
       amenities,
-      userName: user.name,
-      userEmail: user.email,
+      ownerName: user.name,
+      ownerEmail: user.email,
+      createdAt: new Date(),
     };
+
+    console.log("Logged In User:", user);
+    console.log("Sending Studio Data:", studioData);
+    console.log("Owner Email:", studioData.ownerEmail);
+
     try {
       setLoading(true);
 
-      const res = await fetch('http://localhost:5000/studioForm', {
+      const res = await fetch("http://localhost:5000/studioForm", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -125,31 +140,63 @@ const AddStudio = () => {
 
       const result = await res.json();
 
-      console.log("Studio Data:", result);
+      console.log("Backend Response:", result);
 
-      if (res.ok) {
-        toast.success("Studio added successfully!");
-      } else {
+      if (!res.ok) {
         toast.error(result.message || "Failed to add studio!");
+        return;
       }
+
+      toast.success("Studio added successfully!");
+
+      // Reset Form
+      setFormData(initialFormData);
+      setImageUrl("");
+      setAmenities([]);
+      setCustomAmenity("");
+
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Studio Submit Error:", error);
       toast.error("Something went wrong!");
     } finally {
       setLoading(false);
     }
-    setTimeout(() => {
-      setLoading(false);
-      alert("Client side form submitted successfully!");
-    }, 1000);
   };
+
+  // Session Loading
+  if (isPending) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <p className="text-lg font-medium text-gray-500">
+          Loading user information...
+        </p>
+      </div>
+    );
+  }
+
+  // Not Logged In
+  if (!user) {
+    return (
+      <div className="flex min-h-[400px] flex-col items-center justify-center gap-4">
+        <h2 className="text-2xl font-bold text-gray-900">
+          Please Login First
+        </h2>
+
+        <p className="text-gray-500">
+          You need to login before adding a studio.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
+
       {/* Header */}
       <div className="mb-8">
         <div className="mb-3 flex items-center gap-2 text-green-600">
           <Building2 size={20} />
+
           <span className="text-sm font-semibold uppercase tracking-widest">
             Host Your Space
           </span>
@@ -168,6 +215,7 @@ const AddStudio = () => {
         onSubmit={handleSubmit}
         className="space-y-7 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:p-8"
       >
+
         {/* Studio Title */}
         <div>
           <label className="mb-2 block font-medium text-gray-700">
@@ -210,6 +258,7 @@ const AddStudio = () => {
 
         {/* Rate / Deposit / Capacity */}
         <div className="grid gap-5 md:grid-cols-3">
+
           <div>
             <label className="mb-2 block font-medium text-gray-700">
               Hourly Rate ($) *
@@ -260,6 +309,7 @@ const AddStudio = () => {
               className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-green-500"
             />
           </div>
+
         </div>
 
         {/* Location */}
@@ -317,10 +367,6 @@ const AddStudio = () => {
               />
             </div>
           )}
-
-          <p className="mt-2 text-xs text-gray-400">
-            Image upload integration will be added with the backend.
-          </p>
         </div>
 
         {/* Amenities */}
@@ -376,7 +422,10 @@ const AddStudio = () => {
                 >
                   {amenity}
 
-                  <button type="button" onClick={() => handleAmenity(amenity)}>
+                  <button
+                    type="button"
+                    onClick={() => handleAmenity(amenity)}
+                  >
                     <X size={14} />
                   </button>
                 </span>
@@ -404,9 +453,10 @@ const AddStudio = () => {
 
         {/* User Information */}
         <div className="grid gap-5 rounded-xl bg-gray-50 p-5 md:grid-cols-2">
+
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-600">
-              User Name
+              Owner Name
             </label>
 
             <input
@@ -419,7 +469,7 @@ const AddStudio = () => {
 
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-600">
-              User Email
+              Owner Email
             </label>
 
             <input
@@ -429,16 +479,18 @@ const AddStudio = () => {
               className="w-full rounded-lg border border-gray-200 bg-gray-100 px-4 py-3 text-gray-600"
             />
           </div>
+
         </div>
 
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={loading || !user}
+          disabled={loading || !user?.email}
           className="w-full rounded-xl bg-green-600 px-6 py-4 font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? "Submitting..." : "Add New Studio"}
         </button>
+
       </form>
     </div>
   );

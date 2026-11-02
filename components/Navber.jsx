@@ -55,7 +55,7 @@ export default function Navbar() {
     },
     {
       name: "My Studio Listings",
-      href: "/MyListings",
+      href: "/my-listings",
       icon: Building2,
     },
     {

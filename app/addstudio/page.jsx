@@ -1,9 +1,12 @@
-import AddStudioForm from "@/components/AddStudio";
+// import AddStudioForm from "@/components/AddStudio";
+
+import AddStudio from "@/components/AddStudio";
 
 const AddStudioPage = () => {
   return (
     <div>
-      <AddStudioForm />
+      {/* <AddStudioForm /> */}
+      <AddStudio></AddStudio>
     </div>
   );
 };
