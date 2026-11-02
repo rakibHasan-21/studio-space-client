@@ -6,12 +6,12 @@ const page = async ({ searchParams }) => {
   const { category } = await searchParams;
 
   const url = category
-    ? `http://localhost:5000/studios?category=${encodeURIComponent(category)}`
-    : "http://localhost:5000/studios";
+    ? `${process.env.NEXT_PUBLIC_API_URL}/studios?category=${encodeURIComponent(category)}`
+    : `${process.env.NEXT_PUBLIC_API_URL}/studios`;
 
   const res = await fetch(url, {
     cache: "no-store",
-  });
+  }); 
 
   if (!res.ok) {
     throw new Error("Failed to fetch studios");

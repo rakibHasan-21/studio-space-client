@@ -26,7 +26,7 @@ const MyBookingsList = ({ bookings: initialBookings, userEmail }) => {
     try {
       setCancellingId(id);
 
-      const res = await fetch(`http://localhost:5000/bookings/${id}/cancel`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bookings/${id}/cancel`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

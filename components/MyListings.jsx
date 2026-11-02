@@ -24,7 +24,7 @@ const handleDelete = async () => {
 
   try {
     const res = await fetch(
-      `http://localhost:5000/studios/${selectedStudio._id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/studios/${selectedStudio._id}`,
       {
         method: "DELETE",
         credentials: "include",
