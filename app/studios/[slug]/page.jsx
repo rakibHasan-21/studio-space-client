@@ -26,7 +26,7 @@ const Page = async ({ params }) => {
   const userEmail = session?.user?.email || "";
 
   // Fetch studio details
-  const res = await fetch(`http://localhost:5000/studios/${slug}`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/studios/${slug}`, {
     cache: "no-store",
   });
 
