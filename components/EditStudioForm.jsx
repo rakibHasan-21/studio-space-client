@@ -50,6 +50,7 @@ const Update = ({ studio }) => {
         `${process.env.NEXT_PUBLIC_API_URL}/studios/${studio._id}`,
         {
           method: "PUT",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },

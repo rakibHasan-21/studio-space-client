@@ -48,7 +48,7 @@ const Page = async ({ params }) => {
 
   const title = studio.title || studio.studioName || "Creative Studio";
   const price = studio.hourlyRate || studio.pricePerHour;
-
+console.log(images)
   return (
     <section className="min-h-screen bg-slate-50 px-5 py-12">
       <div className="mx-auto max-w-7xl">

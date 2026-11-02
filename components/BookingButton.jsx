@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -51,8 +50,9 @@ const BookingButton = ({ studio }) => {
         selectedDate,
       };
 
-      const res = await fetch("http://localhost:5000/bookings", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bookings`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -80,9 +80,7 @@ const BookingButton = ({ studio }) => {
   return (
     <div className="space-y-4">
       <div>
-        <label className="mb-2 block font-medium">
-          Select Booking Date
-        </label>
+        <label className="mb-2 block font-medium">Select Booking Date</label>
 
         <input
           type="date"

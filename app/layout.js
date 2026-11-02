@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navber";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ThemeProvider } from "@/components/ThemeProvider";
 // import CustomCursor from "@/components/CustomCursor";
 
 const geistSans = Geist({
@@ -25,7 +26,9 @@ export default function RootLayout({ children }) {
       >
         {/* <CustomCursor></CustomCursor> */}
         <Navbar></Navbar>
+        <ThemeProvider>
         {children}
+        </ThemeProvider>
         <ToastContainer position="top-right" autoClose={3000} theme="colored" />
         <Footer />
       </body>

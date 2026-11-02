@@ -16,7 +16,7 @@ import {
   CalendarDays,
   LogOut,
 } from "lucide-react";
-
+import ThemeToggle from "@/components/ThemeToggle";
 import { toast } from "react-toastify";
 import { authClient } from "@/lib/auth-client";
 

@@ -104,6 +104,18 @@ const AddStudio = () => {
       return;
     }
 
+    // const studioData = {
+    //   ...formData,
+    //   hourlyRate: Number(formData.hourlyRate),
+    //   securityDeposit: Number(formData.securityDeposit),
+    //   maxCapacity: Number(formData.maxCapacity),
+    //   imageUrl: imageUrl.trim(),
+    //   amenities,
+    //   ownerName: user.name,
+    //   ownerEmail: user.email,
+    //   createdAt: new Date(),
+    // };
+
     const studioData = {
       ...formData,
       hourlyRate: Number(formData.hourlyRate),
@@ -111,9 +123,6 @@ const AddStudio = () => {
       maxCapacity: Number(formData.maxCapacity),
       imageUrl: imageUrl.trim(),
       amenities,
-      ownerName: user.name,
-      ownerEmail: user.email,
-      createdAt: new Date(),
     };
 
     console.log("Logged In User:", user);
@@ -123,14 +132,27 @@ const AddStudio = () => {
     try {
       setLoading(true);
 
+      const token = session?.session?.token;
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/studioForm`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        credentials: "include",
         body: JSON.stringify(studioData),
       });
+      // const res = await fetch(
+      //   `${process.env.NEXT_PUBLIC_API_URL}/api/studios`,
+      //   {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //     credentials: "include",
+      //     body: JSON.stringify(studioData),
+      //   },
+      // );
 
       const data = await res.json();
 
@@ -190,7 +212,7 @@ const AddStudio = () => {
         </div>
 
         <h1 className="text-3xl font-bold text-gray-900 md:text-4xl">
-          Add New Studio
+          Add New Studio.
         </h1>
 
         <p className="mt-2 text-gray-500">

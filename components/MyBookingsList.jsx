@@ -28,6 +28,7 @@ const MyBookingsList = ({ bookings: initialBookings, userEmail }) => {
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bookings/${id}/cancel`, {
         method: "PATCH",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
