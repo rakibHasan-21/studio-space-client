@@ -13,7 +13,7 @@ const MyBookings = async () => {
   }
 
   const res = await fetch(
-    `http://localhost:5000/bookings?email=${encodeURIComponent(
+    `${process.env.NEXT_PUBLIC_API_URL}/bookings?email=${encodeURIComponent(
       session.user.email
     )}`,
     {

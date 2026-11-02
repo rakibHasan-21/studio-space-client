@@ -17,7 +17,7 @@ const MyListingsPage = async () => {
   const email = session.user.email;
 
   const res = await fetch(
-    `http://localhost:5000/studios?ownerEmail=${encodeURIComponent(email)}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/studios?ownerEmail=${encodeURIComponent(email)}`,
     {
       cache: "no-store",
     }
