@@ -1,6 +1,8 @@
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { headers } from "next/headers";
+
 import {
   MapPin,
   Star,
@@ -10,9 +12,20 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-const page = async ({ params }) => {
+import BookingModal from "@/components/BookingModal";
+import { auth } from "@/lib/auth";
+
+const Page = async ({ params }) => {
   const { slug } = await params;
 
+  // Get logged-in user
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  const userEmail = session?.user?.email || "";
+
+  // Fetch studio details
   const res = await fetch(`http://localhost:5000/studios/${slug}`, {
     cache: "no-store",
   });
@@ -40,6 +53,7 @@ const page = async ({ params }) => {
     <section className="min-h-screen bg-slate-50 px-5 py-12">
       <div className="mx-auto max-w-7xl">
 
+        {/* Back Button */}
         <Link
           href="/studios"
           className="mb-7 inline-flex items-center gap-2 text-sm font-semibold text-green-700 hover:underline"
@@ -48,7 +62,7 @@ const page = async ({ params }) => {
           Back to Studios
         </Link>
 
-        {/* Studio Image Gallery */}
+        {/* Image Gallery */}
         <div className="grid gap-4 md:grid-cols-2">
           <div className="overflow-hidden rounded-2xl">
             <img
@@ -70,18 +84,21 @@ const page = async ({ params }) => {
           </div>
         </div>
 
-        {/* Studio Information */}
+        {/* Main Content */}
         <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_350px]">
 
           <div>
+            {/* Category */}
             <span className="rounded-full bg-green-100 px-4 py-2 text-sm font-semibold capitalize text-green-700">
               {studio.category}
             </span>
 
+            {/* Studio Name */}
             <h1 className="mt-5 text-3xl font-bold text-slate-900 md:text-4xl">
               {title}
             </h1>
 
+            {/* Specifications */}
             <div className="mt-4 flex flex-wrap gap-5 text-sm text-slate-500">
               <span className="flex items-center gap-2">
                 <MapPin size={18} />
@@ -101,6 +118,7 @@ const page = async ({ params }) => {
 
             <div className="my-8 border-t border-slate-200" />
 
+            {/* About */}
             <h2 className="text-2xl font-bold text-slate-900">
               About This Studio
             </h2>
@@ -135,6 +153,7 @@ const page = async ({ params }) => {
               <h3 className="font-bold text-slate-900">
                 {studio.hostName || "Studio Host"}
               </h3>
+
               <p className="mt-2 text-sm text-slate-500">
                 {studio.hostEmail || "Host information unavailable"}
               </p>
@@ -147,7 +166,12 @@ const page = async ({ params }) => {
 
             <div className="mt-5 rounded-2xl border bg-white p-6">
               <div className="flex items-center gap-2">
-                <Star size={22} fill="currentColor" className="text-yellow-500" />
+                <Star
+                  size={22}
+                  fill="currentColor"
+                  className="text-yellow-500"
+                />
+
                 <span className="text-xl font-bold">
                   {studio.rating || "New"}
                 </span>
@@ -162,6 +186,7 @@ const page = async ({ params }) => {
                   <p className="font-semibold">
                     {review.name || "Guest"}
                   </p>
+
                   <p className="mt-2 text-sm text-slate-600">
                     {review.comment}
                   </p>
@@ -172,6 +197,7 @@ const page = async ({ params }) => {
 
           {/* Booking Card */}
           <aside className="h-fit rounded-2xl border bg-white p-6 shadow-sm lg:sticky lg:top-24">
+
             <p className="text-sm text-slate-500">
               Starting from
             </p>
@@ -190,15 +216,11 @@ const page = async ({ params }) => {
               Flexible booking hours
             </p>
 
-            <button
-              type="button"
-              className="w-full rounded-xl bg-green-600 px-5 py-3 font-bold text-white transition hover:bg-green-700"
-            >
-              Book Workspace Now
-            </button>
+            {/* Booking Modal */}
+            <BookingModal studio={studio} userEmail={userEmail}/>
 
             <p className="mt-4 text-center text-xs text-slate-400">
-              Booking confirmation will be available after booking integration.
+              Booking confirmation will be available after booking.
             </p>
           </aside>
 
@@ -208,4 +230,4 @@ const page = async ({ params }) => {
   );
 };
 
-export default page;
+export default Page;

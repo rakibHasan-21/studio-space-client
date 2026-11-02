@@ -55,7 +55,7 @@ export default function Navbar() {
     },
     {
       name: "My Studio Listings",
-      href: "/my-listings",
+      href: "/MyListings",
       icon: Building2,
     },
     {
@@ -259,7 +259,7 @@ export default function Navbar() {
                 {link.name}
               </Link>
             ))}
-            
+
             {isPending ? (
               <div className="mt-3 h-12 animate-pulse rounded-xl bg-slate-100" />
             ) : !user ? (
