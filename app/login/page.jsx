@@ -32,45 +32,58 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
 
-    const formData = new FormData(e.target);
-    const userInfo = Object.fromEntries(formData.entries());
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setError("");
 
-    if (!userInfo.email || !userInfo.password) {
-      toast.error("Please enter your email and password.");
+  const formData = new FormData(e.target);
+  const userInfo = Object.fromEntries(formData.entries());
+
+  if (!userInfo.email || !userInfo.password) {
+    toast.error("Please enter your email and password.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const { data, error } = await authClient.signIn.email({
+      email: userInfo.email,
+      password: userInfo.password,
+      callbackURL: "/",
+    });
+
+    if (error) {
+      setError(error.message || "Invalid email or password!");
+      toast.error(error.message || "Login failed!");
       return;
     }
 
-    try {
-      setLoading(true);
-
-      const { data, error } = await authClient.signIn.email({
-        email: userInfo.email,
-        password: userInfo.password,
-        callbackURL: "/",
+    if (data) {
+      // Create JWT HTTPOnly Cookie
+      const tokenRes = await fetch("/api/backend-token", {
+        method: "POST",
       });
 
-      if (error) {
-        setError(error.message || "Invalid email or password!");
-        toast.error(error.message || "Login failed!");
+      if (!tokenRes.ok) {
+        toast.error("JWT authentication failed!");
         return;
       }
 
-      if (data) {
-        toast.success("Login successful!");
-        router.push("/");
-        router.refresh();
-      }
-    } catch (error) {
-      console.error("Login Error:", error);
-      toast.error("Something went wrong!");
-    } finally {
-      setLoading(false);
+      toast.success("Login successful!");
+
+      router.push("/");
+      router.refresh();
     }
-  };
+  } catch (error) {
+    console.error("Login Error:", error);
+    toast.error("Something went wrong!");
+  } finally {
+    setLoading(false);
+  }
+};
+
   const GoogleSignUp = async () => {
     try {
       await authClient.signIn.social({

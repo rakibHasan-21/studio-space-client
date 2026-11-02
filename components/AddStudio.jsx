@@ -1,16 +1,9 @@
-
 "use client";
 
 import React, { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
-import {
-  Upload,
-  Plus,
-  X,
-  Building2,
-  MapPin,
-} from "lucide-react";
+import { Upload, Plus, X, Building2, MapPin } from "lucide-react";
 
 const categories = [
   "Photo Studio",
@@ -70,7 +63,7 @@ const AddStudio = () => {
     setAmenities((prev) =>
       prev.includes(amenity)
         ? prev.filter((item) => item !== amenity)
-        : [...prev, amenity]
+        : [...prev, amenity],
     );
   };
 
@@ -135,16 +128,14 @@ const AddStudio = () => {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify(studioData),
       });
 
-      const result = await res.json();
-
-      console.log("Backend Response:", result);
+      const data = await res.json();
 
       if (!res.ok) {
-        toast.error(result.message || "Failed to add studio!");
-        return;
+        throw new Error(data.message || "Failed to add studio!");
       }
 
       toast.success("Studio added successfully!");
@@ -154,7 +145,6 @@ const AddStudio = () => {
       setImageUrl("");
       setAmenities([]);
       setCustomAmenity("");
-
     } catch (error) {
       console.error("Studio Submit Error:", error);
       toast.error("Something went wrong!");
@@ -178,9 +168,7 @@ const AddStudio = () => {
   if (!user) {
     return (
       <div className="flex min-h-[400px] flex-col items-center justify-center gap-4">
-        <h2 className="text-2xl font-bold text-gray-900">
-          Please Login First
-        </h2>
+        <h2 className="text-2xl font-bold text-gray-900">Please Login First</h2>
 
         <p className="text-gray-500">
           You need to login before adding a studio.
@@ -191,7 +179,6 @@ const AddStudio = () => {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
-
       {/* Header */}
       <div className="mb-8">
         <div className="mb-3 flex items-center gap-2 text-green-600">
@@ -215,7 +202,6 @@ const AddStudio = () => {
         onSubmit={handleSubmit}
         className="space-y-7 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:p-8"
       >
-
         {/* Studio Title */}
         <div>
           <label className="mb-2 block font-medium text-gray-700">
@@ -258,7 +244,6 @@ const AddStudio = () => {
 
         {/* Rate / Deposit / Capacity */}
         <div className="grid gap-5 md:grid-cols-3">
-
           <div>
             <label className="mb-2 block font-medium text-gray-700">
               Hourly Rate ($) *
@@ -309,7 +294,6 @@ const AddStudio = () => {
               className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-green-500"
             />
           </div>
-
         </div>
 
         {/* Location */}
@@ -422,10 +406,7 @@ const AddStudio = () => {
                 >
                   {amenity}
 
-                  <button
-                    type="button"
-                    onClick={() => handleAmenity(amenity)}
-                  >
+                  <button type="button" onClick={() => handleAmenity(amenity)}>
                     <X size={14} />
                   </button>
                 </span>
@@ -453,7 +434,6 @@ const AddStudio = () => {
 
         {/* User Information */}
         <div className="grid gap-5 rounded-xl bg-gray-50 p-5 md:grid-cols-2">
-
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-600">
               Owner Name
@@ -479,7 +459,6 @@ const AddStudio = () => {
               className="w-full rounded-lg border border-gray-200 bg-gray-100 px-4 py-3 text-gray-600"
             />
           </div>
-
         </div>
 
         {/* Submit Button */}
@@ -490,7 +469,6 @@ const AddStudio = () => {
         >
           {loading ? "Submitting..." : "Add New Studio"}
         </button>
-
       </form>
     </div>
   );

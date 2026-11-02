@@ -17,48 +17,49 @@ const MyListings = ({ studios = [] }) => {
   const [selectedStudio, setSelectedStudio] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  const handleDelete = async () => {
-    if (!selectedStudio) return;
+const handleDelete = async () => {
+  if (!selectedStudio) return;
 
-    setDeleting(true);
+  setDeleting(true);
 
-    try {
-      const res = await fetch(
-        `http://localhost:5000/studios/${selectedStudio._id}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to delete studio!");
+  try {
+    const res = await fetch(
+      `http://localhost:5000/studios/${selectedStudio._id}`,
+      {
+        method: "DELETE",
+        credentials: "include",
       }
+    );
 
-      setStudioList((prev) =>
-        prev.filter(
-          (studio) => studio._id !== selectedStudio._id
-        )
-      );
+    const data = await res.json();
 
-      setSelectedStudio(null);
-
-      toast.success("Studio deleted successfully!", {
-        description: "Your studio listing has been removed.",
-      });
-
-    } catch (error) {
-      console.log(error);
-
-      toast.error("Delete Failed!", {
-        description: error.message || "Something went wrong.",
-      });
-
-    } finally {
-      setDeleting(false);
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to delete studio!");
     }
-  };
+
+    setStudioList((prev) =>
+      prev.filter(
+        (studio) => studio._id !== selectedStudio._id
+      )
+    );
+
+    setSelectedStudio(null);
+
+    toast.success("Studio deleted successfully!", {
+      description: "Your studio listing has been removed.",
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    toast.error("Delete Failed!", {
+      description: error.message || "Something went wrong.",
+    });
+
+  } finally {
+    setDeleting(false);
+  }
+};
 
   if (studioList.length === 0) {
     return (

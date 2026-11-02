@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { CalendarDays, MapPin, XCircle } from "lucide-react";
-import BookingButton from "./BookingButton";
 
 
 const MyBookingsList = ({ bookings: initialBookings, userEmail }) => {

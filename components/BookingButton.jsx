@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -13,6 +14,11 @@ const BookingButton = ({ studio }) => {
 
   const handleBooking = async () => {
     const user = session?.user;
+
+    if (!studio?._id) {
+      toast.error("Studio information not found!");
+      return;
+    }
 
     if (isPending) {
       toast.error("Please wait...");
@@ -89,8 +95,8 @@ const BookingButton = ({ studio }) => {
 
       <button
         onClick={handleBooking}
-        disabled={loading || isPending}
-        className="w-full rounded-lg bg-green-600 px-5 py-3 font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+        disabled={loading || isPending || !studio?._id}
+        className="w-full rounded-lg bg-green-500 px-5 py-3 font-semibold text-white hover:bg-green-700 disabled:opacity-50"
       >
         {loading ? "Booking..." : "Book Now"}
       </button>
