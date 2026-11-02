@@ -60,7 +60,7 @@ export default function Navbar() {
     },
     {
       name: "My Bookings",
-      href: "/dashboard/my-bookings",
+      href: "/my-bookings",
       icon: CalendarDays,
     },
   ];

@@ -10,6 +10,7 @@ import {
   Plus,
 } from "lucide-react";
 import { toast } from "sonner";
+import BookingButton from "./BookingButton";
 
 const MyListings = ({ studios = [] }) => {
   const [studioList, setStudioList] = useState(studios);
@@ -32,18 +33,31 @@ const MyListings = ({ studios = [] }) => {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Delete failed");
+        throw new Error(data.message || "Failed to delete studio!");
       }
 
+      // Remove deleted studio from UI
       setStudioList((prev) =>
-        prev.filter((studio) => studio._id !== selectedStudio._id)
+        prev.filter(
+          (studio) => studio._id !== selectedStudio._id
+        )
       );
 
-      toast.success("Studio deleted successfully!");
-
       setSelectedStudio(null);
+
+      // Success Toast
+      toast.success("Studio deleted successfully!", {
+        description: "Your studio listing has been removed.",
+      });
+
     } catch (error) {
-      toast.error(error.message);
+      console.log(error);
+
+      // Error Toast
+      toast.error("Delete Failed!", {
+        description: error.message || "Something went wrong.",
+      });
+
     } finally {
       setDeleting(false);
     }
@@ -73,7 +87,8 @@ const MyListings = ({ studios = [] }) => {
 
   return (
     <>
-      <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {/* Studio Cards */}
+      <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3 ">
         {studioList.map((studio) => {
           const image = Array.isArray(studio.imageUrl)
             ? studio.imageUrl[0]
@@ -87,7 +102,11 @@ const MyListings = ({ studios = [] }) => {
               {image && (
                 <img
                   src={image}
-                  alt={studio.studioName || studio.title || "Studio"}
+                  alt={
+                    studio.studioName ||
+                    studio.title ||
+                    "Studio"
+                  }
                   className="h-52 w-full object-cover"
                 />
               )}
@@ -107,9 +126,11 @@ const MyListings = ({ studios = [] }) => {
                 </p>
 
                 <p className="mt-3 text-lg font-bold text-green-600">
-                  ${studio.pricePerHour} / hour
+                  ${studio.pricePerHour ?? studio.hourlyRate} / hour
                 </p>
 
+                {/* Action Buttons */}
+                    <BookingButton></BookingButton>
                 <div className="mt-5 grid grid-cols-2 gap-3">
                   <Link
                     href={`/studios/edit/${studio._id}`}
@@ -126,6 +147,7 @@ const MyListings = ({ studios = [] }) => {
                     <Trash2 size={16} />
                     Delete
                   </button>
+                  
                 </div>
               </div>
             </div>
@@ -133,26 +155,33 @@ const MyListings = ({ studios = [] }) => {
         })}
       </div>
 
+      {/* Delete Confirmation Modal */}
       {selectedStudio && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-            <h2 className="text-xl font-bold text-gray-900">
+
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+              <Trash2 className="text-red-600" size={23} />
+            </div>
+
+            <h2 className="mt-4 text-xl font-bold text-gray-900">
               Delete Studio?
             </h2>
 
-            <p className="mt-3 text-sm text-gray-500">
+            <p className="mt-3 text-sm leading-6 text-gray-500">
               Are you sure you want to delete{" "}
-              <strong>
-                {selectedStudio.studioName || selectedStudio.title}
+              <strong className="text-gray-900">
+                {selectedStudio.studioName ||
+                  selectedStudio.title}
               </strong>
-              ?
+              ? This action cannot be undone.
             </p>
 
             <div className="mt-7 flex gap-3">
               <button
                 onClick={() => setSelectedStudio(null)}
                 disabled={deleting}
-                className="flex-1 rounded-lg border px-4 py-3 font-semibold"
+                className="flex-1 rounded-lg border px-4 py-3 font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -160,11 +189,12 @@ const MyListings = ({ studios = [] }) => {
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                className="flex-1 rounded-lg bg-red-600 px-4 py-3 font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+                className="flex-1 rounded-lg bg-red-600 px-4 py-3 font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {deleting ? "Deleting..." : "Confirm Delete"}
               </button>
             </div>
+
           </div>
         </div>
       )}
