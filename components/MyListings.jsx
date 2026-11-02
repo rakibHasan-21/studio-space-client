@@ -36,7 +36,6 @@ const MyListings = ({ studios = [] }) => {
         throw new Error(data.message || "Failed to delete studio!");
       }
 
-      // Remove deleted studio from UI
       setStudioList((prev) =>
         prev.filter(
           (studio) => studio._id !== selectedStudio._id
@@ -45,7 +44,6 @@ const MyListings = ({ studios = [] }) => {
 
       setSelectedStudio(null);
 
-      // Success Toast
       toast.success("Studio deleted successfully!", {
         description: "Your studio listing has been removed.",
       });
@@ -53,7 +51,6 @@ const MyListings = ({ studios = [] }) => {
     } catch (error) {
       console.log(error);
 
-      // Error Toast
       toast.error("Delete Failed!", {
         description: error.message || "Something went wrong.",
       });
