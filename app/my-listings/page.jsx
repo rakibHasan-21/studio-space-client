@@ -1,50 +1,106 @@
 
-import React from "react";
-import { headers } from "next/headers";
+"use client";
+
+import { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { authClient } from "@/lib/auth-client";
 import MyListings from "@/components/MyListings";
 
-const MyListingsPage = async () => {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+const MyListingsPage = () => {
+  const { data: session, isPending } = authClient.useSession();
 
-  if (!session) {
+  const [studios, setStudios] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (isPending) return;
+
+    if (!session?.user?.email) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchListings = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/my-listings?email=${encodeURIComponent(
+            session.user.email
+          )}`,
+          {
+            cache: "no-store",
+          }
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to fetch listings");
+        }
+
+        setStudios(data);
+      } catch (error) {
+        console.error("My Listings Error:", error);
+        setError(error.message || "Something went wrong!");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchListings();
+  }, [session, isPending]);
+
+  if (isPending || loading) {
+    return (
+      <div className="py-20 text-center">
+        <p className="text-gray-500">Loading your studios...</p>
+      </div>
+    );
+  }
+
+  if (!session?.user?.email) {
     redirect("/sign-in");
   }
 
-  const email = session.user.email;
-
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/studios?ownerEmail=${encodeURIComponent(email)}`,
-    {
-      cache: "no-store",
-    }
-  );
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch studios");
-  }
-
-  const studios = await res.json();
-
   return (
-    <section className="min-h-screen bg-slate-50 px-5 py-16">
-      <div className="mx-auto max-w-6xl">
+    <main className="min-h-screen bg-gray-50 px-4 py-16">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-10 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-purple-600">
+              Studio Management
+            </p>
 
-        <h1 className="text-3xl font-bold text-slate-900">
-          My Studio Listings
-        </h1>
+            <h1 className="text-3xl font-bold text-gray-900 md:text-4xl">
+              My Studio Listings
+            </h1>
 
-        <p className="mt-2 text-slate-500">
-          Manage your studio spaces, update details, or delete listings.
-        </p>
+            <p className="mt-2 text-gray-500">
+              Manage and organize your creative spaces.
+            </p>
+          </div>
 
-        <MyListings studios={studios} />
+          <div className="rounded-xl border bg-white px-5 py-3 shadow-sm">
+            <p className="text-sm text-gray-500">Total Studios</p>
+            <p className="text-2xl font-bold">{studios.length}</p>
+          </div>
+        </div>
 
+        {error ? (
+          <p className="rounded-lg bg-red-50 p-4 text-red-600">
+            {error}
+          </p>
+        ) : (
+          <MyListings
+            studios={studios}
+            userEmail={session.user.email}
+          />
+        )}
       </div>
-    </section>
+    </main>
   );
 };
 

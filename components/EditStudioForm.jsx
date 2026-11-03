@@ -1,56 +1,62 @@
+
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
-const Update = ({ studio }) => {
+const EditStudioForm = ({ studio }) => {
   const router = useRouter();
-
-  const [formData, setFormData] = useState({
-    title: studio?.title || "",
-    category: studio?.category || "",
-    hourlyRate: studio?.hourlyRate || "",
-    securityDeposit: studio?.securityDeposit || "",
-    maxCapacity: studio?.maxCapacity || "",
-    location: studio?.location || "",
-    overview: studio?.overview || "",
-  });
-
-  const [imageUrl, setImageUrl] = useState(
-    Array.isArray(studio?.imageUrl)
-      ? studio.imageUrl.join(", ")
-      : studio?.imageUrl || ""
-  );
-
   const [loading, setLoading] = useState(false);
 
+  const [formData, setFormData] = useState({
+    title: studio.title || studio.studioName || "",
+    category: studio.category || "",
+    location: studio.location || "",
+    hourlyRate: studio.hourlyRate || studio.pricePerHour || "",
+    description: studio.description || "",
+    imageUrl: Array.isArray(studio.imageUrl)
+      ? studio.imageUrl.join(", ")
+      : studio.imageUrl || "",
+    maxCapacity: studio.maxCapacity || "",
+    amenities: Array.isArray(studio.amenities)
+      ? studio.amenities.join(", ")
+      : "",
+  });
+
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setLoading(true);
+
+    const updatedData = {
+      ...formData,
+      hourlyRate: Number(formData.hourlyRate),
+      maxCapacity: Number(formData.maxCapacity),
+      imageUrl: formData.imageUrl
+        .split(",")
+        .map((url) => url.trim())
+        .filter(Boolean),
+      amenities: formData.amenities
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
+    };
+
     try {
-      setLoading(true);
-
-      const updatedData = {
-        ...formData,
-        hourlyRate: Number(formData.hourlyRate),
-        securityDeposit: Number(formData.securityDeposit),
-        maxCapacity: Number(formData.maxCapacity),
-        imageUrl: imageUrl.split(",").map((url) => url.trim()).filter(Boolean),
-      };
-
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/studios/${studio._id}`,
         {
           method: "PUT",
-          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -61,15 +67,17 @@ const Update = ({ studio }) => {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Update failed");
+        throw new Error(data.message || "Failed to update studio");
       }
 
       toast.success("Studio updated successfully!");
 
-      router.push("/my-listings");
-      router.refresh();
+      setTimeout(() => {
+        router.push("/my-listings");
+        router.refresh();
+      }, 1000);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error(error.message || "Something went wrong!");
     } finally {
       setLoading(false);
@@ -79,103 +87,135 @@ const Update = ({ studio }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-5 rounded-xl border p-6 shadow-sm"
+      className="space-y-6 rounded-2xl border bg-white p-6 shadow-sm"
     >
       <div>
-        <label className="mb-2 block font-medium">Studio Title</label>
+        <label className="mb-2 block font-semibold">Studio Name</label>
         <input
           name="title"
           value={formData.title}
           onChange={handleChange}
           required
-          className="w-full rounded-lg border p-3"
+          className="w-full rounded-lg border p-3 outline-none focus:border-green-500"
         />
       </div>
 
       <div>
-        <label className="mb-2 block font-medium">Category</label>
-        <input
+        <label className="mb-2 block font-semibold">Category</label>
+        <select
           name="category"
           value={formData.category}
           onChange={handleChange}
           required
-          className="w-full rounded-lg border p-3"
+          className="w-full rounded-lg border p-3 outline-none focus:border-green-500"
+        >
+          <option value="">Select Category</option>
+          <option value="photography">Photography Studio</option>
+          <option value="filmStage">Film Stage</option>
+          <option value="podcast">Podcast Lounge</option>
+          <option value="music">Music Suite</option>
+          <option value="art">Art Workshop</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="mb-2 block font-semibold">Location</label>
+        <input
+          name="location"
+          value={formData.location}
+          onChange={handleChange}
+          required
+          className="w-full rounded-lg border p-3 outline-none focus:border-green-500"
         />
       </div>
 
       <div>
-        <label className="mb-2 block font-medium">Hourly Rate</label>
+        <label className="mb-2 block font-semibold">Hourly Rate ($)</label>
         <input
           type="number"
           name="hourlyRate"
           value={formData.hourlyRate}
           onChange={handleChange}
           required
-          className="w-full rounded-lg border p-3"
+          className="w-full rounded-lg border p-3 outline-none focus:border-green-500"
         />
       </div>
 
       <div>
-        <label className="mb-2 block font-medium">Security Deposit</label>
-        <input
-          type="number"
-          name="securityDeposit"
-          value={formData.securityDeposit}
-          onChange={handleChange}
-          required
-          className="w-full rounded-lg border p-3"
-        />
-      </div>
-
-      <div>
-        <label className="mb-2 block font-medium">Maximum Capacity</label>
+        <label className="mb-2 block font-semibold">Max Capacity</label>
         <input
           type="number"
           name="maxCapacity"
           value={formData.maxCapacity}
           onChange={handleChange}
-          required
-          className="w-full rounded-lg border p-3"
+          className="w-full rounded-lg border p-3 outline-none focus:border-green-500"
         />
       </div>
 
       <div>
-        <label className="mb-2 block font-medium">Location</label>
-        <input
-          name="location"
-          value={formData.location}
-          onChange={handleChange}
-          required
-          className="w-full rounded-lg border p-3"
-        />
-      </div>
-
-      <div>
-        <label className="mb-2 block font-medium">Image URLs</label>
-        <input
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-          required
-          className="w-full rounded-lg border p-3"
-        />
-      </div>
-
-      <div>
-        <label className="mb-2 block font-medium">Overview</label>
+        <label className="mb-2 block font-semibold">
+          Image URLs (comma separated)
+        </label>
         <textarea
-          name="overview"
-          value={formData.overview}
+          name="imageUrl"
+          value={formData.imageUrl}
           onChange={handleChange}
-          required
+          rows={3}
+          className="w-full rounded-lg border p-3 outline-none focus:border-green-500"
+        />
+      </div>
+
+      <div>
+        <label className="mb-2 block font-semibold">
+          Amenities (comma separated)
+        </label>
+        <input
+          name="amenities"
+          value={formData.amenities}
+          onChange={handleChange}
+          className="w-full rounded-lg border p-3 outline-none focus:border-green-500"
+        />
+      </div>
+
+      <div>
+        <label className="mb-2 block font-semibold">Description</label>
+        <textarea
+          name="description"
+          value={formData.description}
+          onChange={handleChange}
           rows={5}
-          className="w-full rounded-lg border p-3"
+          required
+          className="w-full rounded-lg border p-3 outline-none focus:border-green-500"
+        />
+      </div>
+
+      {/* Read-only Host Information */}
+      <div className="rounded-xl bg-gray-50 p-4">
+        <h3 className="mb-3 font-bold">Host Information</h3>
+
+        <label className="mb-2 block text-sm font-medium">
+          Host Name
+        </label>
+        <input
+          value={studio.ownerName || studio.hostName || ""}
+          readOnly
+          className="mb-4 w-full rounded-lg border bg-gray-100 p-3"
+        />
+
+        <label className="mb-2 block text-sm font-medium">
+          Host Email
+        </label>
+        <input
+          value={studio.ownerEmail || studio.hostEmail || ""}
+          readOnly
+          className="w-full rounded-lg border bg-gray-100 p-3"
         />
       </div>
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-lg bg-green-600 py-3 font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+        className="w-full rounded-lg bg-green-600 py-3 font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? "Updating..." : "Update Studio"}
       </button>
@@ -183,4 +223,4 @@ const Update = ({ studio }) => {
   );
 };
 
-export default Update;
+export default EditStudioForm;

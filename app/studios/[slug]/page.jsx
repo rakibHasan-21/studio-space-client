@@ -1,7 +1,6 @@
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { headers } from "next/headers";
 
 import {
   MapPin,
@@ -13,22 +12,17 @@ import {
 } from "lucide-react";
 
 import BookingModal from "@/components/BookingModal";
-import { auth } from "@/lib/auth";
 
 const Page = async ({ params }) => {
   const { slug } = await params;
 
-  // Get logged-in user
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  const userEmail = session?.user?.email || "";
-
   // Fetch studio details
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/studios/${slug}`, {
-    cache: "no-store",
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/studios/${slug}`,
+    {
+      cache: "no-store",
+    }
+  );
 
   if (res.status === 404) {
     notFound();
@@ -40,6 +34,7 @@ const Page = async ({ params }) => {
 
   const studio = await res.json();
 
+  // Handle studio images
   const images = Array.isArray(studio.imageUrl)
     ? studio.imageUrl
     : studio.imageUrl
@@ -48,7 +43,7 @@ const Page = async ({ params }) => {
 
   const title = studio.title || studio.studioName || "Creative Studio";
   const price = studio.hourlyRate || studio.pricePerHour;
-console.log(images)
+
   return (
     <section className="min-h-screen bg-slate-50 px-5 py-12">
       <div className="mx-auto max-w-7xl">
@@ -217,7 +212,7 @@ console.log(images)
             </p>
 
             {/* Booking Modal */}
-            <BookingModal studio={studio} userEmail={userEmail}/>
+            <BookingModal studio={studio} />
 
             <p className="mt-4 text-center text-xs text-slate-400">
               Booking confirmation will be available after booking.

@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from "react";
@@ -45,7 +46,6 @@ const AddStudio = () => {
   const [imageUrl, setImageUrl] = useState("");
   const [customAmenity, setCustomAmenity] = useState("");
   const [amenities, setAmenities] = useState([]);
-
   const [formData, setFormData] = useState(initialFormData);
 
   // Input Change
@@ -63,7 +63,7 @@ const AddStudio = () => {
     setAmenities((prev) =>
       prev.includes(amenity)
         ? prev.filter((item) => item !== amenity)
-        : [...prev, amenity],
+        : [...prev, amenity]
     );
   };
 
@@ -85,6 +85,20 @@ const AddStudio = () => {
     setImageUrl(e.target.value);
   };
 
+  // Image Preview Validation
+  const isValidImageUrl = (value) => {
+    try {
+      const url = new URL(value);
+
+      return (
+        (url.protocol === "https:" || url.protocol === "http:") &&
+        url.hostname.includes(".")
+      );
+    } catch {
+      return false;
+    }
+  };
+
   // Form Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -104,17 +118,10 @@ const AddStudio = () => {
       return;
     }
 
-    // const studioData = {
-    //   ...formData,
-    //   hourlyRate: Number(formData.hourlyRate),
-    //   securityDeposit: Number(formData.securityDeposit),
-    //   maxCapacity: Number(formData.maxCapacity),
-    //   imageUrl: imageUrl.trim(),
-    //   amenities,
-    //   ownerName: user.name,
-    //   ownerEmail: user.email,
-    //   createdAt: new Date(),
-    // };
+    if (!isValidImageUrl(imageUrl.trim())) {
+      toast.error("Please provide a valid image URL!");
+      return;
+    }
 
     const studioData = {
       ...formData,
@@ -123,36 +130,23 @@ const AddStudio = () => {
       maxCapacity: Number(formData.maxCapacity),
       imageUrl: imageUrl.trim(),
       amenities,
+      ownerName: user.name || "",
+      ownerEmail: user.email,
     };
-
-    console.log("Logged In User:", user);
-    console.log("Sending Studio Data:", studioData);
-    console.log("Owner Email:", studioData.ownerEmail);
 
     try {
       setLoading(true);
 
-      const token = session?.session?.token;
-
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/studioForm`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(studioData),
-      });
-      // const res = await fetch(
-      //   `${process.env.NEXT_PUBLIC_API_URL}/api/studios`,
-      //   {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //     credentials: "include",
-      //     body: JSON.stringify(studioData),
-      //   },
-      // );
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/studioForm`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(studioData),
+        }
+      );
 
       const data = await res.json();
 
@@ -162,14 +156,13 @@ const AddStudio = () => {
 
       toast.success("Studio added successfully!");
 
-      // Reset Form
       setFormData(initialFormData);
       setImageUrl("");
       setAmenities([]);
       setCustomAmenity("");
     } catch (error) {
       console.error("Studio Submit Error:", error);
-      toast.error("Something went wrong!");
+      toast.error(error.message || "Something went wrong!");
     } finally {
       setLoading(false);
     }
@@ -190,7 +183,9 @@ const AddStudio = () => {
   if (!user) {
     return (
       <div className="flex min-h-[400px] flex-col items-center justify-center gap-4">
-        <h2 className="text-2xl font-bold text-gray-900">Please Login First</h2>
+        <h2 className="text-2xl font-bold text-gray-900">
+          Please Login First
+        </h2>
 
         <p className="text-gray-500">
           You need to login before adding a studio.
@@ -364,12 +359,15 @@ const AddStudio = () => {
             />
           </div>
 
-          {imageUrl && (
+          {isValidImageUrl(imageUrl.trim()) && (
             <div className="mt-4">
               <img
-                src={imageUrl}
+                src={imageUrl.trim()}
                 alt="Studio Preview"
                 className="h-52 w-full rounded-xl border object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                }}
               />
             </div>
           )}
@@ -428,7 +426,10 @@ const AddStudio = () => {
                 >
                   {amenity}
 
-                  <button type="button" onClick={() => handleAmenity(amenity)}>
+                  <button
+                    type="button"
+                    onClick={() => handleAmenity(amenity)}
+                  >
                     <X size={14} />
                   </button>
                 </span>

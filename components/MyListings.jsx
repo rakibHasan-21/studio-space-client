@@ -1,21 +1,31 @@
-
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   MapPin,
   Pencil,
   Trash2,
+  X,
   Plus,
+  Music,
+  ShieldCheck,
+  Users,
 } from "lucide-react";
-import { toast } from "sonner";
-import BookingButton from "./BookingButton";
 
-const MyListings = ({ studios = [] }) => {
-  const [studioList, setStudioList] = useState(studios);
+const MyListings = ({ studios, userEmail }) => {
+  const router = useRouter();
+
+  const [listings, setListings] = useState(
+    studios.filter((studio) => studio.ownerEmail === userEmail),
+  );
+
   const [selectedStudio, setSelectedStudio] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
 
 const handleDelete = async () => {
   if (!selectedStudio) return;
@@ -27,151 +37,187 @@ const handleDelete = async () => {
       `${process.env.NEXT_PUBLIC_API_URL}/studios/${selectedStudio._id}`,
       {
         method: "DELETE",
-        credentials: "include",
       }
     );
 
     const data = await res.json();
 
     if (!res.ok) {
-      throw new Error(data.message || "Failed to delete studio!");
+      throw new Error(data.message || "Failed to delete studio");
     }
 
-    setStudioList((prev) =>
-      prev.filter(
-        (studio) => studio._id !== selectedStudio._id
-      )
+    setListings((prev) =>
+      prev.filter((studio) => studio._id !== selectedStudio._id)
     );
 
-    setSelectedStudio(null);
+    toast.success("Studio deleted successfully!");
 
-    toast.success("Studio deleted successfully!", {
-      description: "Your studio listing has been removed.",
-    });
+    setSelectedStudio(null);
+    router.refresh();
 
   } catch (error) {
-    console.log(error);
-
-    toast.error("Delete Failed!", {
-      description: error.message || "Something went wrong.",
-    });
+    console.error("Delete Error:", error);
+    toast.error(error.message || "Something went wrong");
 
   } finally {
     setDeleting(false);
   }
 };
 
-  if (studioList.length === 0) {
-    return (
-      <div className="mt-10 rounded-xl border border-dashed bg-white p-12 text-center">
-        <h2 className="text-xl font-semibold">
-          No Studio Listings Found
-        </h2>
-
-        <p className="mt-2 text-gray-500">
-          You haven't added any studio yet.
-        </p>
-
-        <Link
-          href="/add-studio"
-          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-green-600 px-5 py-3 font-semibold text-white hover:bg-green-700"
-        >
-          <Plus size={18} />
-          Add Studio
-        </Link>
-      </div>
-    );
-  }
 
   return (
-    <>
-      {/* Studio Cards */}
-      <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3 ">
-        {studioList.map((studio) => {
-          const image = Array.isArray(studio.imageUrl)
-            ? studio.imageUrl[0]
-            : studio.imageUrl;
+    <div>
+      {listings.length === 0 ? (
+        <div className="rounded-2xl border border-dashed bg-white px-6 py-20 text-center">
+          <Music className="mx-auto mb-4 text-gray-400" size={45} />
 
-          return (
-            <div
-              key={studio._id}
-              className="overflow-hidden rounded-2xl border bg-white shadow-sm"
-            >
-              {image && (
-                <img
-                  src={image}
-                  alt={
-                    studio.studioName ||
-                    studio.title ||
-                    "Studio"
-                  }
-                  className="h-52 w-full object-cover"
-                />
-              )}
+          <h2 className="text-2xl font-bold text-gray-800">No Studios Yet!</h2>
 
-              <div className="p-5">
-                <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold capitalize text-green-700">
-                  {studio.category}
-                </span>
+          <p className="mt-2 text-gray-500">
+            You haven't listed any creative spaces yet.
+          </p>
 
-                <h2 className="mt-4 text-xl font-bold text-slate-900">
-                  {studio.studioName || studio.title}
-                </h2>
+          <Link
+            href="/add-studio"
+            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-black px-6 py-3 font-medium text-white hover:bg-purple-700"
+          >
+            <Plus size={18} />
+            Add New Studio
+          </Link>
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {listings.map((studio) => {
+            const image = Array.isArray(studio.imageUrl)
+              ? studio.imageUrl.flat(Infinity)[0]
+              : studio.imageUrl;
 
-                <p className="mt-3 flex items-center gap-2 text-sm text-gray-500">
-                  <MapPin size={17} />
-                  {studio.location}
-                </p>
+            return (
+              <div
+                key={studio._id}
+                className="overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="relative h-56 w-full bg-gray-100">
+                  {image && (
+                    <Image
+                      src={image}
+                      alt={studio.title}
+                      fill
+                      unoptimized
+                      className="object-cover"
+                    />
+                  )}
 
-                <p className="mt-3 text-lg font-bold text-green-600">
-                  ${studio.pricePerHour ?? studio.hourlyRate} / hour
-                </p>
+                  <span className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-xs font-semibold text-purple-700 shadow">
+                    {studio.category}
+                  </span>
+                </div>
 
-                {/* Action Buttons */}
-                    <BookingButton></BookingButton>
-                <div className="mt-5 grid grid-cols-2 gap-3">
-                  <Link
-                    href={`/studios/edit/${studio._id}`}
-                    className="flex items-center justify-center gap-2 rounded-lg bg-blue-50 px-3 py-3 text-sm font-semibold text-blue-600 hover:bg-blue-100"
-                  >
-                    <Pencil size={16} />
-                    Update
-                  </Link>
+                <div className="space-y-4 p-5">
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900">
+                      {studio.title}
+                    </h2>
 
-                  <button
-                    onClick={() => setSelectedStudio(studio)}
-                    className="flex items-center justify-center gap-2 rounded-lg bg-red-50 px-3 py-3 text-sm font-semibold text-red-600 hover:bg-red-100"
-                  >
-                    <Trash2 size={16} />
-                    Delete
-                  </button>
-                  
+                    <p className="mt-2 flex items-center gap-2 text-sm text-gray-500">
+                      <MapPin size={16} />
+                      {studio.location}
+                    </p>
+                  </div>
+
+                  <p className="line-clamp-2 text-sm leading-6 text-gray-500">
+                    {studio.overview}
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-lg bg-gray-50 p-3">
+                      <p className="text-xs text-gray-500">Hourly Rate</p>
+                      <p className="mt-1 text-lg font-bold">
+                        ${studio.hourlyRate}
+                      </p>
+                    </div>
+
+                    <div className="rounded-lg bg-gray-50 p-3">
+                      <p className="text-xs text-gray-500">Security Deposit</p>
+                      <p className="mt-1 text-lg font-bold">
+                        ${studio.securityDeposit}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between border-t pt-3 text-sm text-gray-500">
+                    <span className="flex items-center gap-1">
+                      <Users size={16} />
+                      {studio.maxCapacity} People
+                    </span>
+
+                    <span className="flex items-center gap-1">
+                      <ShieldCheck size={16} />
+                      Owner Listing
+                    </span>
+                  </div>
+
+                  {studio.amenities?.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {studio.amenities.slice(0, 3).map((item) => (
+                        <span
+                          key={item}
+                          className="rounded-full bg-purple-50 px-3 py-1 text-xs text-purple-700"
+                        >
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 border-t pt-4">
+                    <Link
+                      // href={'/update-studio'}
+                       href={`/update-studio/${studio._id}`}
+                      className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-purple-600 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-700"
+                    >
+                      <Pencil size={16} />
+                      Update
+                    </Link>
+
+                    <button
+                      onClick={() => setSelectedStudio(studio)}
+                      className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-red-50 px-3 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-100"
+                    >
+                      <Trash2 size={16} />
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {selectedStudio && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <button
+              onClick={() => setSelectedStudio(null)}
+              disabled={deleting}
+              className="absolute right-4 top-4 rounded-full p-2 text-gray-500 hover:bg-gray-100"
+            >
+              <X size={20} />
+            </button>
 
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-              <Trash2 className="text-red-600" size={23} />
+            <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600">
+              <Trash2 size={27} />
             </div>
 
-            <h2 className="mt-4 text-xl font-bold text-gray-900">
-              Delete Studio?
-            </h2>
+            <h2 className="text-xl font-bold text-gray-900">Delete Studio?</h2>
 
             <p className="mt-3 text-sm leading-6 text-gray-500">
               Are you sure you want to delete{" "}
-              <strong className="text-gray-900">
-                {selectedStudio.studioName ||
-                  selectedStudio.title}
-              </strong>
+              <span className="font-semibold text-gray-900">
+                {selectedStudio.title}
+              </span>
               ? This action cannot be undone.
             </p>
 
@@ -179,7 +225,7 @@ const handleDelete = async () => {
               <button
                 onClick={() => setSelectedStudio(null)}
                 disabled={deleting}
-                className="flex-1 rounded-lg border px-4 py-3 font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                className="flex-1 rounded-lg border px-4 py-3 font-semibold text-gray-700 hover:bg-gray-50"
               >
                 Cancel
               </button>
@@ -187,16 +233,15 @@ const handleDelete = async () => {
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                className="flex-1 rounded-lg bg-red-600 px-4 py-3 font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex-1 rounded-lg bg-red-600 px-4 py-3 font-semibold text-white hover:bg-red-700 disabled:opacity-50"
               >
-                {deleting ? "Deleting..." : "Confirm Delete"}
+                {deleting ? "Deleting..." : "Yes, Delete"}
               </button>
             </div>
-
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

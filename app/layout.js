@@ -19,17 +19,17 @@ const geistMono = Geist_Mono({
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className="light" style={{ colorScheme: "light" }}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         cz-shortcut-listen="true"
       >
         {/* <CustomCursor></CustomCursor> */}
-        <Navbar></Navbar>
         <ThemeProvider>
+        <Navbar></Navbar>
         {children}
-        </ThemeProvider>
         <ToastContainer position="top-right" autoClose={3000} theme="colored" />
+        </ThemeProvider>
         <Footer />
       </body>
     </html>

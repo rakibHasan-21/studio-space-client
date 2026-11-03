@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -7,20 +8,22 @@ import { useRouter } from "next/navigation";
 
 const BookingButton = ({ studio }) => {
   const { data: session, isPending } = authClient.useSession();
+
   const [selectedDate, setSelectedDate] = useState("");
   const [loading, setLoading] = useState(false);
+
   const router = useRouter();
 
   const handleBooking = async () => {
     const user = session?.user;
 
-    if (!studio?._id) {
-      toast.error("Studio information not found!");
+    if (isPending) {
+      toast.error("Please wait...");
       return;
     }
 
-    if (isPending) {
-      toast.error("Please wait...");
+    if (!studio?._id) {
+      toast.error("Studio information not found!");
       return;
     }
 
@@ -40,24 +43,33 @@ const BookingButton = ({ studio }) => {
       const bookingData = {
         studioId: studio._id,
         studioTitle: studio.title,
+
         studioImage: Array.isArray(studio.imageUrl)
           ? studio.imageUrl[0]
           : studio.imageUrl,
+
         location: studio.location,
         hourlyRate: Number(studio.hourlyRate),
-        userName: user.name,
+
+        userName: user.name || "",
+        customerName: user.name || "",
         userEmail: user.email,
+
+        ownerEmail: studio.ownerEmail || "",
+
         selectedDate,
       };
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bookings`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(bookingData),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/bookings`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bookingData),
+        }
+      );
 
       const data = await res.json();
 
@@ -66,12 +78,17 @@ const BookingButton = ({ studio }) => {
       }
 
       toast.success("Booking successful!");
+
       setSelectedDate("");
+
       router.push("/my-bookings");
       router.refresh();
+
     } catch (error) {
-      console.log(error);
+      console.error("Booking Error:", error);
+
       toast.error(error.message || "Something went wrong!");
+
     } finally {
       setLoading(false);
     }
@@ -80,7 +97,9 @@ const BookingButton = ({ studio }) => {
   return (
     <div className="space-y-4">
       <div>
-        <label className="mb-2 block font-medium">Select Booking Date</label>
+        <label className="mb-2 block font-medium">
+          Select Booking Date
+        </label>
 
         <input
           type="date"
