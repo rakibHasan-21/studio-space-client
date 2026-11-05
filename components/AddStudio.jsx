@@ -84,7 +84,6 @@ const AddStudio = () => {
     setImageUrl(e.target.value);
   };
 
-  // Image Preview Validation
   const isValidImageUrl = (value) => {
     try {
       const url = new URL(value);
