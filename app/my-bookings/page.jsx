@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -26,22 +25,23 @@ const MyBookings = () => {
         setLoading(true);
         setError("");
 
+        
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/bookings?email=${encodeURIComponent(
-            session.user.email
+            session.user.email,
           )}`,
           {
             cache: "no-store",
-          }
+          },
         );
 
-        const data = await res.json();
+        const result = await res.json();
 
         if (!res.ok) {
           throw new Error(data.message || "Failed to fetch bookings");
         }
 
-        setBookings(data);
+        setBookings(result);
       } catch (error) {
         console.error("Bookings Error:", error);
         setError(error.message || "Something went wrong!");
@@ -70,20 +70,13 @@ const MyBookings = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold">My Bookings</h1>
 
-        <p className="mt-2 text-gray-500">
-          Manage your studio reservations.
-        </p>
+        <p className="mt-2 text-gray-500">Manage your studio reservations.</p>
       </div>
 
       {error ? (
-        <p className="rounded-lg bg-red-50 p-4 text-red-600">
-          {error}
-        </p>
+        <p className="rounded-lg bg-red-50 p-4 text-red-600">{error}</p>
       ) : (
-        <MyBookingsList
-          bookings={bookings}
-          userEmail={session.user.email}
-        />
+        <MyBookingsList bookings={bookings} userEmail={session.user.email} />
       )}
     </div>
   );

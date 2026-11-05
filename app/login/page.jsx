@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -32,57 +33,84 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
 
-const handleLogin = async (e) => {
-  e.preventDefault();
-  setError("");
+    const formData = new FormData(e.target);
+    const userInfo = Object.fromEntries(formData.entries());
 
-  const formData = new FormData(e.target);
-  const userInfo = Object.fromEntries(formData.entries());
-
-  if (!userInfo.email || !userInfo.password) {
-    toast.error("Please enter your email and password.");
-    return;
-  }
-
-  try {
-    setLoading(true);
-
-    const { data, error } = await authClient.signIn.email({
-      email: userInfo.email,
-      password: userInfo.password,
-      callbackURL: "/",
-    });
-
-    if (error) {
-      setError(error.message || "Invalid email or password!");
-      toast.error(error.message || "Login failed!");
+    if (!userInfo.email || !userInfo.password) {
+      toast.error("Please enter your email and password.");
       return;
     }
 
-    if (data) {
-      // Create JWT HTTPOnly Cookie
-      const tokenRes = await fetch("/api/backend-token", {
-        method: "POST",
+    try {
+      setLoading(true);
+
+      // Better Auth email login
+      const { data, error } = await authClient.signIn.email({
+        email: userInfo.email,
+        password: userInfo.password,
+        callbackURL: "/",
       });
 
-      if (!tokenRes.ok) {
-        toast.error("JWT authentication failed!");
+      if (error) {
+        setError(error.message || "Invalid email or password!");
+        toast.error(error.message || "Login failed!");
         return;
+      }
+
+      if (!data) {
+        throw new Error("Login failed!");
+      }
+
+      // Get JWT from Better Auth JWT plugin
+      const { data: tokenData, error: tokenError } =
+        await authClient.token();
+
+      if (tokenError || !tokenData?.token) {
+        throw new Error(
+          tokenError?.message || "JWT token generation failed!"
+        );
+      }
+
+      // Send JWT to Express backend and create HTTPOnly cookie
+      const tokenRes = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/set-token`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token: tokenData.token,
+          }),
+        }
+      );
+
+      const tokenResult = await tokenRes.json();
+
+      if (!tokenRes.ok) {
+        throw new Error(
+          tokenResult.message || "JWT authentication failed!"
+        );
       }
 
       toast.success("Login successful!");
 
       router.push("/");
       router.refresh();
+    } catch (error) {
+      console.error("Login Error:", error);
+
+      setError(error.message || "Something went wrong!");
+      toast.error(error.message || "Something went wrong!");
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Login Error:", error);
-    toast.error("Something went wrong!");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const GoogleSignUp = async () => {
     try {
@@ -95,9 +123,11 @@ const handleLogin = async (e) => {
       toast.error("Google signup failed!");
     }
   };
+
   return (
     <section className="flex min-h-[calc(100vh-76px)] items-center justify-center bg-slate-50 px-4 py-12">
       <Card className="mx-auto grid w-full max-w-5xl overflow-hidden rounded-3xl border-slate-200 p-0 shadow-xl shadow-slate-900/5 md:grid-cols-2">
+
         {/* Left Side */}
         <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-800 p-10 text-white md:flex">
           <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-white/10 blur-2xl" />
@@ -134,7 +164,6 @@ const handleLogin = async (e) => {
               ].map((item) => (
                 <div key={item} className="flex items-center gap-3">
                   <CheckCircle2 size={19} className="text-indigo-200" />
-
                   <span className="text-sm font-medium text-indigo-50">
                     {item}
                   </span>
@@ -151,6 +180,7 @@ const handleLogin = async (e) => {
         {/* Right Side */}
         <CardContent className="px-6 py-12 sm:px-10 lg:px-12">
           <div className="mx-auto max-w-md">
+
             {/* Mobile Logo */}
             <div className="mb-8 md:hidden">
               <Link href="/" className="flex items-center gap-2">
@@ -181,6 +211,7 @@ const handleLogin = async (e) => {
 
             {/* Login Form */}
             <form onSubmit={handleLogin} className="space-y-5">
+
               {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address</Label>
@@ -272,7 +303,7 @@ const handleLogin = async (e) => {
 
             {/* Google Login */}
             <Button
-            onClick={GoogleSignUp}
+              onClick={GoogleSignUp}
               type="button"
               variant="outline"
               className="h-12 w-full rounded-xl border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50"
@@ -291,6 +322,7 @@ const handleLogin = async (e) => {
                 Create Account
               </Link>
             </p>
+
           </div>
         </CardContent>
       </Card>

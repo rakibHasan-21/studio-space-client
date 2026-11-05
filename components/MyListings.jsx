@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
 
 const MyListings = ({ studios, userEmail }) => {
   const router = useRouter();
@@ -26,44 +27,48 @@ const MyListings = ({ studios, userEmail }) => {
   const [selectedStudio, setSelectedStudio] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
+  const handleDelete = async () => {
+    if (!selectedStudio) return;
 
-const handleDelete = async () => {
-  if (!selectedStudio) return;
+    setDeleting(true);
 
-  setDeleting(true);
+    const { data, error } = await authClient.token();
+    const token = data?.token;
+    console.log(token);
 
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/studios/${selectedStudio._id}`,
-      {
-        method: "DELETE",
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/studios/${selectedStudio._id}`,
+        {
+          method: "DELETE",
+          headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        },
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to delete studio");
       }
-    );
 
-    const data = await res.json();
+      setListings((prev) =>
+        prev.filter((studio) => studio._id !== selectedStudio._id),
+      );
 
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to delete studio");
+      toast.success("Studio deleted successfully!");
+
+      setSelectedStudio(null);
+      router.refresh();
+    } catch (error) {
+      console.error("Delete Error:", error);
+      toast.error(error.message || "Something went wrong");
+    } finally {
+      setDeleting(false);
     }
-
-    setListings((prev) =>
-      prev.filter((studio) => studio._id !== selectedStudio._id)
-    );
-
-    toast.success("Studio deleted successfully!");
-
-    setSelectedStudio(null);
-    router.refresh();
-
-  } catch (error) {
-    console.error("Delete Error:", error);
-    toast.error(error.message || "Something went wrong");
-
-  } finally {
-    setDeleting(false);
-  }
-};
-
+  };
 
   return (
     <div>
@@ -173,7 +178,7 @@ const handleDelete = async () => {
                   <div className="flex gap-3 border-t pt-4">
                     <Link
                       // href={'/update-studio'}
-                       href={`/update-studio/${studio._id}`}
+                      href={`/update-studio/${studio._id}`}
                       className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-purple-600 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-700"
                     >
                       <Pencil size={16} />

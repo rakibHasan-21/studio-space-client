@@ -1,9 +1,8 @@
-
 "use client";
 
 import React, { useState } from "react";
-import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
+import { authClient } from "@/lib/auth-client";
 import { Upload, Plus, X, Building2, MapPin } from "lucide-react";
 
 const categories = [
@@ -63,7 +62,7 @@ const AddStudio = () => {
     setAmenities((prev) =>
       prev.includes(amenity)
         ? prev.filter((item) => item !== amenity)
-        : [...prev, amenity]
+        : [...prev, amenity],
     );
   };
 
@@ -137,21 +136,22 @@ const AddStudio = () => {
     try {
       setLoading(true);
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/studioForm`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(studioData),
-        }
-      );
+      const { data, error } = await authClient.token();
+      const token = data?.token
+      console.log(token)
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/studioForm`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(studioData),
+      });
 
-      const data = await res.json();
+      const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Failed to add studio!");
+        throw new Error(result.message || "Failed to add studio!");
       }
 
       toast.success("Studio added successfully!");
@@ -183,9 +183,7 @@ const AddStudio = () => {
   if (!user) {
     return (
       <div className="flex min-h-[400px] flex-col items-center justify-center gap-4">
-        <h2 className="text-2xl font-bold text-gray-900">
-          Please Login First
-        </h2>
+        <h2 className="text-2xl font-bold text-gray-900">Please Login First</h2>
 
         <p className="text-gray-500">
           You need to login before adding a studio.
@@ -426,10 +424,7 @@ const AddStudio = () => {
                 >
                   {amenity}
 
-                  <button
-                    type="button"
-                    onClick={() => handleAmenity(amenity)}
-                  >
+                  <button type="button" onClick={() => handleAmenity(amenity)}>
                     <X size={14} />
                   </button>
                 </span>

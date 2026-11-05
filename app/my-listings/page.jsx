@@ -26,6 +26,7 @@ const MyListingsPage = () => {
         setLoading(true);
         setError("");
 
+        
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/my-listings?email=${encodeURIComponent(
             session.user.email

@@ -1,37 +1,178 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# StudioSpace – Creative Studio Rental Marketplace
 
-## Getting Started
+**Live Website:** https://studio-space-client-lake.vercel.app/
 
-First, run the development server:
+StudioSpace is a peer-to-peer creative studio rental marketplace designed for photographers, filmmakers, podcasters, musicians, and other creative professionals. Users can explore creative spaces, view studio details, and book their preferred workspaces. Studio owners can also list and manage their studios.
+
+## 🚀 Live Project & Repositories
+
+- **Live Website:** https://studio-space-client-lake.vercel.app/
+- **Client Repository:** https://github.com/rakibHasan-21/studio-space-client
+- **Server Repository:** https://github.com/rakibHasan-21/studio-space-server-
+
+## ✨ Key Features
+
+- **User Authentication:** Secure registration and login using Better Auth with Google authentication.
+- **Studio Listings:** Add, update, delete, and manage studio listings.
+- **Explore Studios:** Browse creative spaces with categories, pricing, ratings, and locations.
+- **Studio Details:** View complete studio information and amenities.
+- **Booking System:** Reserve studios and manage booking requests.
+- **My Bookings:** View booking history and reservation status.
+- **My Listings:** Manage personally listed studios.
+- **Protected Routes:** Restrict private pages and protected operations to authenticated users.
+- **JWT Security:** Secure API requests using JWT authentication.
+- **Double Booking Prevention:** Check existing confirmed bookings to prevent overlapping reservations.
+- **Theme Customization:** Light and dark mode support.
+- **Responsive Design:** Optimized for desktop, tablet, and mobile devices.
+- **Toast Notifications:** Modern success and error notifications.
+
+## 🛠️ Technology Stack
+
+### Frontend
+- Next.js
+- React
+- JavaScript
+- Tailwind CSS
+- Shadcn UI
+- Lucide React
+
+### Authentication
+- Better Auth
+- JWT
+- Google OAuth
+
+### Backend
+- Node.js
+- Express.js
+- MongoDB
+- JSON Web Token (JWT)
+
+### Deployment
+- Vercel
+
+## 📂 Project Structure
+
+**Client Side**
+```text
+studio-space-client/
+├── app/
+├── components/
+├── lib/
+├── public/
+├── package.json
+└── next.config.js
+```
+
+**Server Side**
+```text
+studio-space-server/
+├── index.js
+├── package.json
+├── .env
+└── node_modules/
+```
+
+## ⚙️ Local Installation & Setup
+
+### 1. Clone Client Repository
+
+```bash
+git clone https://github.com/rakibHasan-21/studio-space-client.git
+
+cd studio-space-client
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Configure Environment Variables
+
+Create a `.env.local` file in the client root directory.
+
+Add your required environment variables:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000
+```
+
+Add other required authentication and OAuth credentials according to your project configuration.
+
+### 4. Run Client Application
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 in your browser.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### 5. Clone Server Repository
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open another terminal:
 
-## Learn More
+```bash
+git clone https://github.com/rakibHasan-21/studio-space-server-.git
 
-To learn more about Next.js, take a look at the following resources:
+cd studio-space-server-
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 6. Install Server Dependencies
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm install
+```
 
-## Deploy on Vercel
+### 7. Configure Server Environment Variables
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Create a `.env` file in the server root directory.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```env
+PORT=5000
+MONGODB_URI=your_mongodb_connection_string
+MONGODB_PASS=your_mongodb_password
+JWT_SECRET=your_jwt_secret
+```
+
+Add any other environment variables required by your server configuration.
+
+### 8. Run Backend Server
+
+```bash
+npm start
+```
+
+## 🔐 Security Features
+
+- JWT-based API authentication.
+- HTTPOnly cookie-based token protection.
+- Protected server-side operations.
+- Unauthorized requests receive appropriate error responses.
+- Booking conflict checking against confirmed reservations.
+
+## 📋 Main Application Routes
+
+| Route | Description |
+|---|---|
+| `/` | Home Page |
+| `/studios` | Explore Studios |
+| `/studios/[id]` | Studio Details |
+| `/add-studio` | Add New Studio |
+| `/my-listings` | Manage My Listings |
+| `/my-bookings` | Manage My Bookings |
+| `/login` | User Login |
+| `/register` | User Registration |
+
+## 👨‍💻 Developer
+
+**Rakib Hasan**
+
+Frontend Developer | Next.js Developer
+
+- **GitHub:** https://github.com/rakibHasan-21
+- **Portfolio:** https://portfolio-mauve-seven-13.vercel.app/
+
+---
+
+*StudioSpace – Find Your Space. Create Your Story.*

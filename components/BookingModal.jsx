@@ -37,10 +37,15 @@ const { data: session } = authClient.useSession();
     try {
       setLoading(true);
 
+      const { data, error } = await authClient.token();
+      const token = data?.token;
+      console.log(token);
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bookings`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(bookingData),
       });

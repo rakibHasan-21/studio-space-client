@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -60,21 +59,20 @@ const BookingButton = ({ studio }) => {
         selectedDate,
       };
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/bookings`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(bookingData),
-        }
-      );
+      
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bookings`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(bookingData),
+      });
 
-      const data = await res.json();
+      const rasult = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Booking failed!");
+        throw new Error(rasult.message || "Booking failed!");
       }
 
       toast.success("Booking successful!");
@@ -83,12 +81,10 @@ const BookingButton = ({ studio }) => {
 
       router.push("/my-bookings");
       router.refresh();
-
     } catch (error) {
       console.error("Booking Error:", error);
 
       toast.error(error.message || "Something went wrong!");
-
     } finally {
       setLoading(false);
     }
@@ -97,9 +93,7 @@ const BookingButton = ({ studio }) => {
   return (
     <div className="space-y-4">
       <div>
-        <label className="mb-2 block font-medium">
-          Select Booking Date
-        </label>
+        <label className="mb-2 block font-medium">Select Booking Date</label>
 
         <input
           type="date"

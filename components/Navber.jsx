@@ -130,7 +130,6 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Desktop Authentication */}
         <div className="hidden items-center gap-3 md:flex">
           {isPending ? (
             <div className="h-10 w-28 animate-pulse rounded-xl bg-slate-100" />
@@ -142,7 +141,7 @@ export default function Navbar() {
               >
                 Login
               </Link>
-
+              
               <div>
                 <ThemeToggle />
               </div>
